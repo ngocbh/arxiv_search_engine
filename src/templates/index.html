@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>A simple search engine for arxiv dataset</title>
+  <meta name="description" value="The search engine that doesn't track you. Learn More.">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+
+  <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='styles/index.css') }}">
+</head>
+
+<body>
+<div class="menu"><a class="btn" href="#"></a></div>
+<div class="wrapper">
+    <div class="duck"></div>
+    <div class="search">
+        <form method="get" action="/search">
+          <input type="text" name="q" placeholder="" autocomplete="off" />
+          <button class="btn" type="submit"></button>
+        </form>
+    </div>
+    <div class="message"><span>A simple search engine for arxiv dataset. <a href="https://github.com/ngocjr7/sse_arxiv">source code</a>.</span></div>
+</div>
+</body>
+</html>

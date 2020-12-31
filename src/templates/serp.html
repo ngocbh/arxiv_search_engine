@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>SERP</title>
+  <meta name="description" value="The search engine that doesn't track you. Learn More.">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+
+  <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.0/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+  <script src="//code.jquery.com/jquery-1.11.1.min.js"></script>
+  <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.0/js/bootstrap.min.js"></script>
+  <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='styles/serp.css') }}">
+</head>
+<body>
+  {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    <ul>
+    {% for message in messages %}
+      <li>{{ message }} </li>
+    {% endfor %}
+    </ul>
+    {% endif %}
+  {% endwith %}
+
+  <div class="serp">
+    <div class="serp__layout">
+      <div class="serp__header">
+        <div class="serp__search">
+          <form class="serp__form" action="" methode="GET">
+            <div>
+              <input name="q" type="search" value="{{query}}"
+                     class="serp__query" 
+                     maxlength="512"
+                     autocomplete="off"
+                     title="Search"
+                     aria-label="Search"
+                     dir="ltr"
+                     spellcheck="false"
+                     autofocus="autofocus"
+              >
+            </div>
+            <button class="serp__button" aria-label="Search" type="submit">
+              <div class="serp__ico"></div>
+            </button>
+          </form>
+        </div>
+        <a href="/"><img class='serp__logo_kid' src='static/images/1412.png'></img></a>
+        <ul class="serp__nav">
+          <li class="serp__active"><a href="">Documents</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="serp__body">
+      <div class="serp__main serp__results">
+        <div class="serp__web">
+          <div style="margin-bottom: 20px; margin-left: 20px; color: grey;">
+            <span>Search engine found {{no_hits}} potential papers ({{se_time}} ms) (<a href="elasticsearch?redirect=1">view</a>)</span><br>
+            <span>Parser found {{no_records}} matched sentences in {{no_papers}}/{{no_hits}} potential papers ({{nlp_time}} ms)</span>
+          </div>
+          <span class="serp__label">Web Results</span>
+          {% if no_records > 0 %}
+          {% for record in records %}
+          <div class="panel panel-white post panel-shadow">
+            <div class="serp__result">
+              <!-- <a href="##" target="_blank"> -->
+              <!-- <span class="serp__title">News</span><br> -->
+              <span class="serp__description">"{{record['sentence'] | safe}}"</span>
+              <hr style="margin: 5px;">
+              <table>
+                <tr>
+                  <td style="width: 80px;">
+                    <span class="serp__url">{{record['paper_id']}}</span></a><br>
+                  </td>
+                  <td style="width: 150px;">
+                    <span class="serp__url">{{record['authors']}}</span></a><br>
+                  </td>
+                  <td style="width: 440px;">
+                    <span class="serp__url">{{record['title']}}</span></a><br>
+                  </td>
+                  <td style="width: 100px;">
+                    <span class="serp__url">{{record['date']}}</span></a><br>
+                  </td>
+                </tr>
+              </table>
+            </div>
+          </div>
+          {% endfor %}
+        {% else %}
+        <div class="serp__no-results">
+          <p><strong>No search results were found for &raquo;{{query}}&laquo;</strong></p>
+          <p>Suggestions:</p>
+          <ul>
+            <li>Check that all words are spelled correctly.</li>
+            <li>Try different search terms.</li>
+            <li>Try a more general search.</li>
+            <li>Try fewer search terms.</li>
+          </ul>
+        </div>
+        {% endif %}
+        </div>
+        {% if no_hits > size %}
+        <!-- <div class="serp__pagination"> -->
+        <!--   <ul> -->
+        <!--     <li><a class="serp__disabled"></a></li> -->
+        <!--     <li class="serp__pagination-active"><a href="#"></a></li> -->
+        <!--     <li><a href=getnextlink({{i}})></a></li> -->
+        <!--     <li><a href="{{ url_for('serp', page=2)}}"></a></li> -->
+        <!--     <li><a href="#"></a></li> -->
+        <!--     <li><a href="#"></a></li> -->
+        <!--     <li><a href="#"></a></li> -->
+        <!--     <li><a href="#"></a></li> -->
+        <!--     <li><a href="#"></a></li> -->
+        <!--     <li><a href="#"></a></li> -->
+        <!--     <li><a href="#"></a></li> -->
+        <!--   </ul> -->
+        {{pagination.links}}
+        <!-- </div> -->
+        {% endif %}
+      </div>
+      <div class="serp__sidebar">
+        <div class="serp__sticky">
+          <div class="serp__headline">Settings</div>
+          <form action='/settings'>
+            <div>
+            <span class="serp__settings_span">Highlight and match: </span><br>
+            <input type="radio" id="subtree" name="highlight" value="subtree" {% if settings['parser']['subtree'] %}checked{% endif %}>
+            <label class="serp__settings_label" for="subtree"> noun & subtree</label><br>
+            <input type="radio" id="chunk" name="highlight" value="chunk" {% if not settings['parser']['subtree'] %}checked{% endif %}>
+            <label class="serp__settings_label" for="chunk"> noun chunk</label><br>
+            </div>
+            <div>
+            <span class="serp__settings_span">Noun chunk types:</span><br>
+            {% for noun, used in settings['parser']['nouns'].items() %}
+            <input type="checkbox" id={{noun}} name={{noun}} value=1 {% if used %}checked{% endif %}>
+            <label class="serp__settings_label" for={{noun}}>{{noun}}</label><br>
+            {% endfor %}
+            </div>
+            <input class="serp__settings_button" type="submit" value="Update settings">
+          </form>
+        </div>
+      </div>
+
+
+    </div>
+  </div>
+  <div class="serp__footer">
+      <div class="serp__bottom">
+        <ul class="serp__links">
+          <li><a href="#about" data-toggle="modal" data-target="#about">About</a></li>
+          <li><a href="#about">Privacy</a></li>
+          <li><a href="#about">Terms</a></li>
+          <li><a href="#about">Contact Us</a></li>
+        </ul>
+        <p class="serp__copyright">&copy; 2020 ngocjr7</p>
+      </div>
+    </div>
+  <!-- Modal -->
+  <div class="modal" id="about" aria-hidden="true">
+    <div class="modal__dialog">
+      <div class="modal__header">
+        <h2>About</h2>
+        <a href="#" class="modal__close" aria-hidden="true">×</a>
+      </div>
+      <div class="modal__body">
+        <strong>Lorem Ipsum</strong><br>
+        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+      </div>
+      <div class="modal__footer">
+        <p>Last Update 01.01.2019</p>
+      </div>
+    </div>
+  </div>
+  <!-- /Modal -->
+  <script type="text/javascript">
+    function getnextlink(i) {
+      return "hello"
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,14 @@
+testing: 0
+
+dataset: './data/arxiv_dataset_50k.json'
+
+search_engine:
+  reindex: False
+
+parser:
+  subtree: True
+  nouns:
+    nsubj: True
+    nsubjpass: True
+    pobj: False
+    dobj: False

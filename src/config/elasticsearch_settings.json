@@ -1,0 +1,40 @@
+{
+  "settings": {
+    "analysis": {
+      "analyzer": {
+        "english_exact": {
+          "tokenizer": "standard",
+          "filter": [
+            "lowercase", 
+            "porter_stem"
+          ]
+        }
+      }
+    },
+    "index.max_result_window": 100000
+  },
+  "mappings": {
+    "properties": {
+      "abstract": {
+        "type": "text",
+        "analyzer": "english",
+        "fields": {
+          "exact": {
+            "type": "text",
+            "analyzer": "english_exact"
+          }
+        }
+      }, 
+      "title": {
+        "type": "text",
+        "analyzer": "english",
+        "fields": {
+          "exact": {
+            "type": "text",
+            "analyzer": "english_exact"
+          }
+        }
+      }
+    }
+  }
+}
