@@ -43,11 +43,9 @@ dataset: './data/arxiv_dataset_500k.json'
 ```
 * Config ```elasticsearch``` at elasticsearch folder
 > file: ```config/elasticsearch.yml```: add config: ```http.max_content_length: 1gb```
-> file: ```jvm.options```: change config: 
-```
--Xms4g
--Xmx4g
-```
+
+> file: ```jvm.options```: change config to: 
+> ```-Xms4g -Xmx4g```
 
 
 
