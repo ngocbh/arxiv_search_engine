@@ -2,6 +2,9 @@ testing: 0
 
 dataset: './data/arxiv_dataset_50k.json'
 
+abstract_dataset: './data/abstract_arxiv_dataset_50k.json'
+title_dataset: './data/title_arxiv_dataset_50k.json'
+
 search_engine:
   reindex: False
 

@@ -3,6 +3,8 @@ import spacy
 import nltk
 import lemminflect
 import copy
+import string
+import re
 
 from nltk.stem import PorterStemmer
 from nltk.tokenize import sent_tokenize, word_tokenize
@@ -41,47 +43,49 @@ def find_subjects(sent, deps):
     dependency_tree(sent.root, deps, ret) 
     return ret
 
-
-def match_phrase(text, phrase, deps=['nsubj', 'nsubjpass'], subtree=True):
-    phrase_doc = nlp(phrase)
-    phrase_lemma = ' '.join([ps.stem(token.text.strip().lower()) for token in phrase_doc if not token.is_punct])
-
-    ret = []
-    text = preprocess_text(text)
+def parse_sent(text, subtree=True):
     doc = nlp(text)
-    sents = [sent for sent in doc.sents]
 
-    for i, sent in enumerate(sents):
-        presence = False
-        sent_text = sent.text
-        highlighted_sent_text = copy.deepcopy(sent_text)
+    records = []
+    for chunk in doc.noun_chunks:
+        subj_tokens = [token for token in (chunk.subtree if subtree else chunk)]
 
-        for chunk in sent.noun_chunks:
-            subj_tokens = [token for token in (chunk.subtree if subtree else chunk)]
+        record = {}
+        start_idx = subj_tokens[0].idx 
+        end_idx = subj_tokens[-1].idx + len(subj_tokens[-1].text)
+        record['origin'] = text[start_idx:end_idx]
+        record['lemma'] = ' '.join([ps.stem(token.text.strip().lower()) for token in subj_tokens if not token.is_punct])
+        record['dep'] = chunk.root.dep_
+        if record['dep'] in ['nsubj', 'nsubjpass', 'pobj', 'dobj']:
+            records.append(record)
+    return records
 
-            start_idx = subj_tokens[0].idx - sent[0].idx
-            end_idx = subj_tokens[-1].idx + len(subj_tokens[-1].text) - sent[0].idx
-            subj_origin = sent_text[start_idx:end_idx]
-            subj_lemma = ' '.join([ps.stem(token.text.strip().lower()) for token in subj_tokens if not token.is_punct])
-            subj_dep = chunk.root.dep_
+def match_phrase(text, phrase, subjs, deps=['nsubj', 'nsubjpass'], is_head=False, is_tail=False):
+    phrase = phrase.translate(str.maketrans('', '', string.punctuation))
+    phrase_lemma = ' '.join([ps.stem(token.strip().lower()) for token in phrase.split()])
 
-            if subj_dep in deps and phrase_lemma in subj_lemma:
-                highlighted_sent_text = highlighted_sent_text.replace(subj_origin, "<em>{}</em>".format(subj_origin), 1) 
-                presence = True
+    presence = False
+    highlighted_sent_text = copy.deepcopy(text)
 
-        if presence:
-            if i != 0:
-                highlighted_sent_text = '...' + highlighted_sent_text
-            if i != len(sents) - 1:
-                highlighted_sent_text = highlighted_sent_text + '...'
-            ret.append(highlighted_sent_text)
+    for subj in subjs:
+        if subj['dep'] in deps and phrase_lemma in subj['lemma']:
+            highlighted_sent_text = highlighted_sent_text.replace(subj['origin'], "<em>{}</em>".format(subj['origin']), 1) 
+            presence = True
 
-    return ret
+    if presence:
+        if is_head:
+            highlighted_sent_text = '...' + highlighted_sent_text
+        if is_tail:
+            highlighted_sent_text = highlighted_sent_text + '...'
+        return highlighted_sent_text
+    else:
+        return None
+
 
 
 if __name__ == "__main__":
     doc = """
 The first component of this proposed system is a web based interface or Graphical User Interface, which resides on top of the Client Application Program, the second component of the system is a client Application program running in an application server, which resides on top of the Global Database Management System, the third component of the system is a Global Database Management System and global schema of the multidatabase system server, which resides on top of the distributed heterogeneous local component database system servers, and the fourth component is remote heterogeneous local component database system servers
     """
-    print(match_phrase(doc, 'system'))
+    print(parse_sent(doc, True))
 

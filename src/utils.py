@@ -56,8 +56,8 @@ def get_deps(config):
             ret.append(key)
     return ret
 
-def get_index(config):
-    dataset = config['dataset'] 
+def get_index(config, dataset='dataset'):
+    dataset = config[dataset] 
     return os.path.splitext(os.path.basename(dataset))[0]
 
 

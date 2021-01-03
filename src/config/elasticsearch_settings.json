@@ -11,11 +11,12 @@
         }
       }
     },
-    "index.max_result_window": 100000
+    "index.max_result_window": 100000,
+    "index.blocks.read_only_allow_delete": null
   },
   "mappings": {
     "properties": {
-      "abstract": {
+      "sent": {
         "type": "text",
         "analyzer": "english",
         "fields": {

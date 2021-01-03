@@ -1,6 +1,6 @@
 from flask import Flask
 from flask import render_template, redirect, request, jsonify, url_for
-from search_engine import index_dataset, search_phrase, query_database
+from search_engine import index_dataset, search_phrase, query_sentences
 from flask_paginate import Pagination, get_page_args
 
 import utils
@@ -13,6 +13,9 @@ import os
 __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
 
 configs = utils.load_configs(os.path.join(__location__, 'config/config.yml'))
+abstract_index = utils.get_index(configs, 'abstract_dataset')
+title_index = utils.get_index(configs, 'title_dataset') 
+
 app = Flask(__name__)
 
 @app.route('/')
@@ -22,7 +25,7 @@ def index():
 @app.route('/search')
 def serp():
     query = request.args.get('q', '')
-    field = request.args.get('field', 'abstract')
+    field = request.args.get('field', 'sent')
     page = request.args.get('page', '1')
     _size = request.args.get('size', '50')
     deps = utils.get_deps(configs)
@@ -31,7 +34,8 @@ def serp():
     print(query)
     print(deps)
     res = search_phrase(query, field=field, deps=deps, 
-                        index=utils.get_index(configs), 
+                        abstract_index=abstract_index, 
+                        title_index=title_index,
                         _from=(page-1)*_size, 
                         _size=_size,
                         subtree=configs['parser']['subtree'])
@@ -65,12 +69,12 @@ def elasticsearch():
         return redirect(url)
 
     query = request.args.get('q', '')
-    field = request.args.get('field', 'abstract')
+    field = request.args.get('field', 'sent')
     page = request.args.get('page', '1')
     _size = request.args.get('size', '50')
     page = int(page)
     _size = int(_size)
-    res = query_database(field, query, index=utils.get_index(configs), _size=_size, _from=(page-1)*_size)
+    res = query_sentences(field, query, index=abstract_index, _size=_size, _from=(page-1)*_size)
     return jsonify(res)
 
 @app.route('/settings')
@@ -88,6 +92,7 @@ def settings():
     return redirect(request.referrer)
 
 if __name__ == '__main__':
-    index_dataset(utils.get_index(configs), configs['dataset'], configs['search_engine']['reindex'])
+    index_dataset(abstract_index, configs['abstract_dataset'], configs['search_engine']['reindex'])
+    index_dataset(title_index, configs['title_dataset'], configs['search_engine']['reindex'])
 
     app.run(host='0.0.0.0', port=8080, debug=True, threaded=True)
