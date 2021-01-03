@@ -7,7 +7,7 @@ Given a keyword (e.g., “linear regression” or “deep learning”), it will 
 
 ## How it looks
 ![alt tag](https://github.com/ngocjr7/arxiv_search_engine/blob/master/docs/demo1.png)
-![alt tag](https://github.com/ngocjr7/arxiv_search_engine/blob/master/docs/demo.png)
+![alt tag](https://github.com/ngocjr7/arxiv_search_engine/blob/develop/docs/demo.png)
 
 ## How to run
 
